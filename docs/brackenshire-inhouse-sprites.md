@@ -1,5 +1,7 @@
 # Brackenshire in-house sprite painter (no SpriteCook credits)
 
+> The scripts below now live as real files in the repo (`tools/inhouse/`, `test/birds.py`). See `tools/README.md`.
+
 Started 4 Oct 2026 after Sam asked whether new Beasties could be made here from what the SpriteCook templates taught us. First trial: journal entry after the Chapter 1 bird (its only evolution), front and rear, plus a rear view of the Chapter 1 bird itself. In the game since preview version 5. **Sam has not yet said whether the quality is good enough to roll out**; check the changelog before doing more.
 
 ## Method

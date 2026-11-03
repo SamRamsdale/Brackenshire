@@ -1,5 +1,7 @@
 # Brackenshire art tools (scripts used to build the SpriteCook-based art)
 
+> The scripts below now live as real files in the repo (`tools/`, `test/`). See `tools/README.md`.
+
 Recreate these files under `game/` in a new session. Template images (see `claude/brackenshire-template-images.md` for how to restore 1 to 17) go in `art/tpl/up01.png` .. `up17.png`, `up19.png` (walk cycle, pixel version), plus the full-size `up18_raw.png` (lab and gym) and `up20_raw.png` (Chapter 1 Beasties). If a raw image is missing, skip its script and take the finished sprites from `ASSET_SRC` in the build (name -> [density, base64 PNG]). Run order: `python3 tools/slice.py` (also runs tall_buildings.py) -> `tools/interior.py` -> `tools/walk.py` -> `tools/beasts20.py` -> `tools/doll.py` -> `tools/build_assets.py` -> `python3 build.py`.
 
 ## build.py

@@ -16,3 +16,7 @@ The game's code lives in `src/`, one file per section, joined in the order liste
 `docs/` holds the design notes, changelog, style guide and art tools from earlier work.
 Start with `docs/brackenshire-changelog.md` (latest status) and `docs/brackenshire-design-notes.md` (Sam's choices and rules).
 Keep the Beasties a surprise: refer to them by Journal number in notes and pull requests.
+
+## Art
+The sprite workshop is in `tools/` (see `tools/README.md`): unpack sprites to `art/out/`, check them with
+`tools/check_sprites.py`, preview them in the game with `tools/preview.py`, and pack them back with `tools/build_assets.py`.
