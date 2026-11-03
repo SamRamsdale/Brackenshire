@@ -23,7 +23,8 @@ class Paint:
         return (u / rx) ** 2 + (v / ry) ** 2 <= 1
     def smooth(s, m, r=1.2):   # round off polygon corners
         return ndimage.gaussian_filter(m.astype(float), r * s.ss) > .5
-    def fill(s, m, col, light=.22, shade=.3, rim=.22, rimw=3.0, direction=(-.55, -.8), clip=None):
+    def fill(s, m, col, light=.22, shade=.3, rim=.22, rimw=3.0, direction=None, clip=None):
+        direction = direction or getattr(s, 'light_dir', (-.55, -.8))   # back views set light_dir mirrored
         if clip is not None: m = m & clip
         if not m.any(): return m
         col = hexrgb(col) if isinstance(col, str) else col

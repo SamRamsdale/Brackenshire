@@ -10,7 +10,7 @@ BR, BR_L, BR_D, BR_DD = '#85542c', '#a56f3b', '#5e381b', '#3e230e'
 OR, CREAM, CREAM_D = '#ec7e04', '#f9e8b8', '#d6b67d'
 
 def pipwren_back(path=None):
-    p = Paint(64, 8)
+    p = Paint(64, 8); p.light_dir = (.55, -.8)          # lit from the upper right: after mirroring it comes from the top-left
     # --- the cocked tail first: it rises behind the far side of the body, like on the front sprite
     tail = p.smooth(p.poly([(38, 30), (44, 12), (46.5, 4), (51, 3.5), (55, 6), (52, 14), (46, 32)]), .8)
     p.fill(tail, BR_D, light=.3, shade=.3, rimw=2.2)
