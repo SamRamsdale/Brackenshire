@@ -23,7 +23,8 @@ class Paint:
         return (u / rx) ** 2 + (v / ry) ** 2 <= 1
     def smooth(s, m, r=1.2):   # round off polygon corners
         return ndimage.gaussian_filter(m.astype(float), r * s.ss) > .5
-    def fill(s, m, col, light=.22, shade=.3, rim=.22, rimw=3.0, direction=(-.55, -.8), clip=None):
+    def fill(s, m, col, light=.22, shade=.3, rim=.22, rimw=3.0, direction=None, clip=None):
+        direction = direction or getattr(s, 'light_dir', (-.55, -.8))   # back views set light_dir mirrored
         if clip is not None: m = m & clip
         if not m.any(): return m
         col = hexrgb(col) if isinstance(col, str) else col
@@ -77,6 +78,8 @@ class Paint:
         ring = ndimage.binary_dilation(al, structure=ndimage.generate_binary_structure(2, 1)) & ~al
         near = ndimage.uniform_filter(np.where(al[..., None], rgb, 0), size=(3, 3, 1)) / np.maximum(ndimage.uniform_filter(al.astype(float), size=3)[..., None], 1e-6)
         oc = hexrgb(outline); rgb[ring] = near[ring] * .22 + oc * .78; al = al | ring
+        # final palette pass so the outline tints do not push the colour count up (keeps it within the style guide)
+        rgb = np.array(Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), 'RGB').quantize(colors + 8, method=Image.MEDIANCUT, dither=Image.NONE).convert('RGB')).astype(float)
         out = np.dstack([rgb, np.where(al, 255, 0)]).astype(np.uint8); out[~al] = 0
         im = Image.fromarray(out, 'RGBA')
         if crop: im = im.crop(im.getbbox())
