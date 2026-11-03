@@ -20,6 +20,7 @@
   --good:#6ad08a;
   --warn:#e6b84c;
   --old:#8e97a8;
+  --bad:#ff7a6a;
   --font-ui:"Pixelify Sans","Courier New",monospace;
   color-scheme:dark;
 }
@@ -28,6 +29,7 @@ body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-u
   background-image:radial-gradient(ellipse at 50% 0%, #1e2636 0%, var(--ground) 60%);background-attachment:fixed;
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:16px;box-sizing:border-box}
 .offstage{display:none}
+[hidden]{display:none!important}
 .wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
 header.top h1{margin:0;font-size:26px;font-weight:600;letter-spacing:.06em;color:var(--ink)}
@@ -58,6 +60,7 @@ button[aria-pressed="true"]{background:var(--heather);color:#1a1424;border-color
 .view.light .lbl{color:#4a5468}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{font-size:13px;border-radius:999px;padding:2px 10px;border:1px solid currentColor;white-space:nowrap}
+.chip.bad{color:var(--bad)}
 .chip.new{color:var(--good)} .chip.mirror{color:var(--warn)} .chip.old{color:var(--old)}
 .types{display:flex;gap:6px}
 .types:empty{display:none}
@@ -78,6 +81,15 @@ button[aria-pressed="true"]{background:var(--heather);color:#1a1424;border-color
 .cell .n{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .cell .dots{position:absolute;top:5px;right:6px;display:flex;gap:3px}
 .dot{width:7px;height:7px;border-radius:50%}
+.flagmark{position:absolute;top:3px;left:6px;color:var(--bad);font-size:14px;line-height:1}
+.view .fl{font-size:13px;padding:2px 8px}
+.view .fl[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#1a1414}
+.flagbox{display:flex;flex-direction:column;gap:8px;background:var(--panel);border-radius:8px;padding:10px}
+.flagbox label{font-size:14px;color:var(--muted)}
+.flagbox .row{display:flex;gap:6px;flex-wrap:wrap}
+.flagbox input{flex:1;min-width:10em;font-family:var(--font-ui);font-size:15px;background:var(--ground);color:var(--ink);border:1px solid #394154;border-radius:6px;padding:4px 10px}
+.flagbar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:14px;color:var(--muted)}
+.flagbar strong{color:var(--bad)}
 .dot.new{background:var(--good)} .dot.mirror{background:var(--warn)} .dot.old{background:#4a5264}
 .key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}
 .key span{display:inline-flex;align-items:center;gap:5px}
@@ -100,9 +112,13 @@ kbd{font-family:var(--font-ui);background:var(--panel);color:var(--ink);border:1
         <div class="nav"><button id="prev" aria-label="Previous Beastie">◀</button><button id="next" aria-label="Next Beastie">▶</button></div>
       </div>
       <div class="stage" id="stage">
-        <div class="view"><canvas id="c-front" width="160" height="160"></canvas><span class="lbl">Front</span></div>
-        <div class="view"><canvas id="c-back" width="160" height="160"></canvas><span class="lbl">Back</span></div>
+        <div class="view"><canvas id="c-front" width="160" height="160"></canvas><span class="lbl">Front</span><button class="fl" id="fl-f" aria-pressed="false">⚑ Flag as bad</button></div>
+        <div class="view"><canvas id="c-back" width="160" height="160"></canvas><span class="lbl">Back</span><button class="fl" id="fl-b" aria-pressed="false">⚑ Flag as bad</button></div>
       </div>
+      <form class="flagbox" id="flagbox" hidden>
+        <label for="flagnote" id="flaglabel">What looks wrong? (optional)</label>
+        <div class="row"><input id="flagnote" maxlength="140" placeholder="e.g. looks flat, wrong colours, cut off"><button type="submit">Save flag</button><button type="button" id="flagcancel">Cancel</button></div>
+      </form>
       <div class="chips" id="e-chips"></div>
       <div class="types" id="e-types"></div>
       <p class="blurb" id="e-dex"></p>
@@ -120,9 +136,11 @@ kbd{font-family:var(--font-ui);background:var(--panel);color:var(--ink);border:1
         <button data-f="newb">New back</button>
         <button data-f="needb">Needs a back</button>
         <button data-f="oldf">Old front</button>
+        <button data-f="flag">Flagged</button>
         <input id="q" type="search" placeholder="Find #number" aria-label="Find a Beastie by number or name">
       </div>
-      <div class="key"><span><i class="dot new"></i>new art</span><span><i class="dot mirror"></i>no back yet (front flipped)</span><span><i class="dot old"></i>original code-drawn art</span><span>Left dot front, right dot back</span></div>
+      <div class="flagbar" id="flagbar"></div>
+      <div class="key"><span><i class="dot new"></i>new art</span><span><i class="dot mirror"></i>no back yet (front flipped)</span><span><i class="dot old"></i>original code-drawn art</span><span><span style="color:var(--bad)">⚑</span> flagged as bad</span><span>Left dot front, right dot back</span></div>
       <div class="grid" id="grid"></div>
       <div class="empty" id="empty" hidden>No Beasties match that.</div>
     </section>
