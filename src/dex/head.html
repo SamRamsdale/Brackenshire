@@ -1,0 +1,150 @@
+<title>Brackenshire Journal</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: the game's handheld look turned into a field journal. Entry page on the left (sticky), the whole Journal as a grid on the right.
+   Single dark look by design, matching the game. Built by build.py from the game's own code, so it always shows the game's current art. */
+:root{
+  --ground:#141a24;      /* moor at night */
+  --panel:#1c2330;
+  --bezel:#2a3140;
+  --bezel-hi:#3a4356;
+  --ink:#e8e2d0;         /* parchment */
+  --muted:#8e97a8;
+  --heather:#b68ad0;     /* accent */
+  --gold:#e6b84c;
+  --good:#6ad08a;
+  --warn:#e6b84c;
+  --old:#8e97a8;
+  --bad:#ff7a6a;
+  --font-ui:"Pixelify Sans","Courier New",monospace;
+  color-scheme:dark;
+}
+html,body{min-height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-ui);font-size:15px;line-height:1.4;
+  background-image:radial-gradient(ellipse at 50% 0%, #1e2636 0%, var(--ground) 60%);background-attachment:fixed;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:16px;box-sizing:border-box}
+.offstage{display:none}
+[hidden]{display:none!important}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+header.top h1{margin:0;font-size:26px;font-weight:600;letter-spacing:.06em;color:var(--ink)}
+header.top h1 b{color:var(--heather);font-weight:600}
+.tally{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+.tally strong{color:var(--ink);font-weight:600}
+.cols{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+
+/* the entry page */
+.entry{position:sticky;top:max(16px, env(safe-area-inset-top, 0px));background:linear-gradient(180deg,var(--bezel-hi),var(--bezel));border-radius:14px;padding:14px;
+  box-shadow:0 10px 40px #0008, inset 0 1px 0 #ffffff18;display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (max-width:860px){.entry{position:static}}
+.entry-head{display:flex;align-items:center;gap:10px}
+.entry-head .num{font-size:22px;color:var(--gold);font-variant-numeric:tabular-nums}
+.entry-head .name{font-size:22px;font-weight:600;flex:1;min-width:0;overflow-wrap:anywhere}
+.nav{display:flex;gap:6px}
+button{font-family:var(--font-ui);font-size:15px;color:var(--ink);background:var(--panel);border:1px solid #394154;border-bottom-width:3px;border-radius:6px;padding:4px 10px;cursor:pointer}
+button:hover{border-color:var(--heather)}
+button:focus-visible,input:focus-visible,.cell:focus-visible{outline:3px solid var(--heather);outline-offset:2px}
+button[aria-pressed="true"]{background:var(--heather);color:#1a1424;border-color:var(--heather)}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.view{background:#0d1118;border-radius:6px;box-shadow:0 0 0 2px #0a0d12;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px 8px;
+  background-image:radial-gradient(ellipse 60% 14% at 50% 86%, #2a3a2a 0%, #2a3a2a 70%, transparent 72%), linear-gradient(180deg,#1a2536 0%,#0d1118 100%)}
+.view.light{background-image:radial-gradient(ellipse 60% 14% at 50% 86%, #a8b878 0%, #a8b878 70%, transparent 72%), linear-gradient(180deg,#bcd8e8 0%,#e8f0d8 100%)}
+.view canvas{width:100%;max-width:240px;aspect-ratio:1;image-rendering:pixelated;image-rendering:crisp-edges}
+.view .lbl{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.view.light .lbl{color:#4a5468}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:13px;border-radius:999px;padding:2px 10px;border:1px solid currentColor;white-space:nowrap}
+.chip.bad{color:var(--bad)}
+.chip.new{color:var(--good)} .chip.mirror{color:var(--warn)} .chip.old{color:var(--old)}
+.types{display:flex;gap:6px}
+.types:empty{display:none}
+.type{font-size:13px;border-radius:4px;padding:1px 8px;color:#111;font-weight:600}
+.blurb{margin:0;color:var(--ink);max-width:60ch}
+.hidden-note{margin:0;color:var(--muted);font-size:14px}
+.toggles{display:flex;flex-wrap:wrap;gap:6px}
+
+/* the grid */
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters input{font-family:var(--font-ui);font-size:15px;background:var(--panel);color:var(--ink);border:1px solid #394154;border-radius:6px;padding:4px 10px;width:12em;max-width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.cell{background:var(--panel);border-radius:8px;border:2px solid transparent;padding:6px 4px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;position:relative}
+.cell:hover{border-color:#394154}
+.cell.on{border-color:var(--heather);background:#2a2438}
+.cell canvas{width:72px;height:72px;image-rendering:pixelated;image-rendering:crisp-edges}
+.cell .n{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cell .dots{position:absolute;top:5px;right:6px;display:flex;gap:3px}
+.dot{width:7px;height:7px;border-radius:50%}
+.flagmark{position:absolute;top:3px;left:6px;color:var(--bad);font-size:14px;line-height:1}
+.view .fl{font-size:13px;padding:2px 8px}
+.view .fl[aria-pressed="true"]{background:var(--bad);border-color:var(--bad);color:#1a1414}
+.flagbox{display:flex;flex-direction:column;gap:8px;background:var(--panel);border-radius:8px;padding:10px}
+.flagbox label{font-size:14px;color:var(--muted)}
+.flagbox .row{display:flex;gap:6px;flex-wrap:wrap}
+.flagbox input{flex:1;min-width:10em;font-family:var(--font-ui);font-size:15px;background:var(--ground);color:var(--ink);border:1px solid #394154;border-radius:6px;padding:4px 10px}
+.flagbar{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:14px;color:var(--muted)}
+.flagbar strong{color:var(--bad)}
+.dot.new{background:var(--good)} .dot.mirror{background:var(--warn)} .dot.old{background:#4a5264}
+.key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted)}
+.key span{display:inline-flex;align-items:center;gap:5px}
+.empty{color:var(--muted);padding:20px 0}
+.keys{font-size:13px;color:var(--muted)}
+kbd{font-family:var(--font-ui);background:var(--panel);color:var(--ink);border:1px solid #394154;border-bottom-width:3px;border-radius:5px;padding:0 6px;font-size:12px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+<div class="offstage" hidden><canvas id="screen" aria-hidden="true"></canvas><div id="credits"></div></div>
+<div class="wrap">
+  <header class="top">
+    <h1><b>Brackenshire</b> Journal</h1>
+    <div class="tally" id="tally">Loading the Beasties…</div>
+  </header>
+  <div class="cols">
+    <section class="entry" aria-label="Journal entry">
+      <div class="entry-head">
+        <span class="num" id="e-num">#001</span>
+        <span class="name" id="e-name"></span>
+        <div class="nav"><button id="prev" aria-label="Previous Beastie">◀</button><button id="next" aria-label="Next Beastie">▶</button></div>
+      </div>
+      <div class="stage" id="stage">
+        <div class="view"><canvas id="c-front" width="160" height="160"></canvas><span class="lbl">Front</span><button class="fl" id="fl-f" aria-pressed="false">⚑ Flag as bad</button></div>
+        <div class="view"><canvas id="c-back" width="160" height="160"></canvas><span class="lbl">Back</span><button class="fl" id="fl-b" aria-pressed="false">⚑ Flag as bad</button></div>
+      </div>
+      <form class="flagbox" id="flagbox" hidden>
+        <label for="flagnote" id="flaglabel">What looks wrong? (optional)</label>
+        <div class="row"><input id="flagnote" maxlength="140" placeholder="e.g. looks flat, wrong colours, cut off"><button type="submit">Save flag</button><button type="button" id="flagcancel">Cancel</button></div>
+      </form>
+      <div class="chips" id="e-chips"></div>
+      <div class="types" id="e-types"></div>
+      <p class="blurb" id="e-dex"></p>
+      <div class="toggles">
+        <button id="t-names" aria-pressed="false">Show names</button>
+        <button id="t-shiny" aria-pressed="false">Shiny colours</button>
+        <button id="t-light" aria-pressed="false">Daylight backdrop</button>
+      </div>
+      <div class="keys"><kbd>←</kbd><kbd>→</kbd> flip pages · <kbd>S</kbd> shiny · <kbd>B</kbd> backdrop</div>
+    </section>
+    <section class="side" aria-label="All Beasties">
+      <div class="filters" role="group" aria-label="Show">
+        <button data-f="all" aria-pressed="true">All</button>
+        <button data-f="newf">New front</button>
+        <button data-f="newb">New back</button>
+        <button data-f="needb">Needs a back</button>
+        <button data-f="oldf">Old front</button>
+        <button data-f="flag">Flagged</button>
+        <input id="q" type="search" placeholder="Find #number" aria-label="Find a Beastie by number or name">
+      </div>
+      <div class="flagbar" id="flagbar"></div>
+      <div class="key"><span><i class="dot new"></i>new art</span><span><i class="dot mirror"></i>no back yet (front flipped)</span><span><i class="dot old"></i>original code-drawn art</span><span><span style="color:var(--bad)">⚑</span> flagged as bad</span><span>Left dot front, right dot back</span></div>
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" hidden>No Beasties match that.</div>
+    </section>
+  </div>
+</div>
+<script>
+"use strict";
