@@ -1,0 +1,57 @@
+<title>Brackenshire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one handheld-style bezel centred on a moorland-night ground, controls strip beneath. Single dark look by design. */
+:root{
+  --ground:#141a24;      /* moor at night */
+  --bezel:#2a3140;       /* console shell */
+  --bezel-hi:#3a4356;
+  --ink:#e8e2d0;         /* parchment text */
+  --muted:#8e97a8;
+  --heather:#b68ad0;     /* accent */
+  --key:#1c222e;
+  --font-ui:"Pixelify Sans","Courier New",monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--ground);color:var(--ink);font-family:var(--font-ui);margin:0;
+  padding-inline:16px;padding-block:16px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background-image:radial-gradient(ellipse at 50% 0%, #1e2636 0%, var(--ground) 70%);}
+.shell{background:linear-gradient(180deg,var(--bezel-hi),var(--bezel));border-radius:14px;padding:12px;box-shadow:0 10px 40px #0008, inset 0 1px 0 #ffffff18;
+  box-sizing:border-box;position:relative;max-width:100%}
+.screen-wrap{position:relative;background:#000;border-radius:3px;overflow:hidden;box-shadow:0 0 0 2px #0a0d12;margin:0 auto}
+canvas{display:block;image-rendering:pixelated;image-rendering:crisp-edges;outline:none}
+.brand{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-inline:4px;font-size:13px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.brand b{color:var(--heather);font-weight:600}
+.led{width:8px;height:8px;border-radius:50%;background:#6ad08a;box-shadow:0 0 6px #6ad08a;display:inline-block;margin-right:8px;vertical-align:middle}
+.controls{display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;font-size:14px;color:var(--muted);max-width:800px}
+.controls span{white-space:nowrap}
+kbd{font-family:var(--font-ui);background:var(--key);color:var(--ink);border:1px solid #394154;border-bottom-width:3px;border-radius:5px;padding:1px 7px;font-size:13px;margin-right:4px}
+#focus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000a;color:var(--ink);font-size:20px;cursor:pointer;letter-spacing:.06em;border:0;font-family:var(--font-ui);width:100%}
+#focus:focus-visible{outline:3px solid var(--heather);outline-offset:-6px}
+@media (max-width:520px){.controls{font-size:12px}.brand{font-size:11px}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+.credits{min-height:17px;font-size:13px;color:var(--muted);letter-spacing:.04em;text-align:center}.credits::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#e6b84c;box-shadow:0 0 5px #e6b84c88;margin-right:8px;vertical-align:middle}
+</style>
+<div class="shell">
+  <div class="screen-wrap">
+    <canvas id="screen" tabindex="0" aria-label="Brackenshire game screen"></canvas>
+    <button id="focus" hidden>Click to play</button>
+  </div>
+  <div class="brand"><span><i class="led"></i><b>Brackenshire</b></span><span id="clock"></span></div>
+</div>
+<div class="controls" aria-label="Controls">
+  <span><kbd>↑↓←→</kbd>or <kbd>WASD</kbd>Move</span>
+  <span><kbd>Z</kbd>/<kbd>Space</kbd>Confirm / talk</span>
+  <span><kbd>X</kbd>/<kbd>Esc</kbd>Back</span>
+  <span><kbd>Enter</kbd>Menu</span>
+  <span><kbd>Shift</kbd>Hold to run</span>
+  <span><kbd>C</kbd>Type guide</span>
+  <span><kbd>M</kbd>Sound on/off</span>
+  <span><kbd>Mouse</kbd>Click to choose, right-click back</span>
+</div>
+<div class="credits" id="credits" aria-live="off"></div>
+<script>
+"use strict";
