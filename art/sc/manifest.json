@@ -1,0 +1,94 @@
+{
+ "pipwren_b": {
+  "asset_id": "875ebf16-292e-41cc-b3bf-ef8cb248ed47",
+  "sha12": "7aa65805476f"
+ },
+ "burrabit_b": {
+  "asset_id": "c33ba166-4921-4610-93d2-fabfd2febb7b",
+  "sha12": "f7e38021dc8b"
+ },
+ "buzzlet_b": {
+  "asset_id": "7dac57fe-3fad-4d1f-81e0-2855310ab006",
+  "sha12": "d77ff3f0e0ca"
+ },
+ "crawlie_b": {
+  "asset_id": "af0762ca-5409-4909-9aa7-97ff7916be9e",
+  "sha12": "13aef69504c2"
+ },
+ "wickmoth_b": {
+  "asset_id": "be310be4-be40-4f80-ab0b-ce7b3f733538",
+  "sha12": "0bddf8f97eb3"
+ },
+ "brockling_b": {
+  "asset_id": "4d82552f-7ed6-4be6-8f5b-5ba398b1e790",
+  "sha12": "8fb1d4848291"
+ },
+ "hollowl_b": {
+  "asset_id": "0a42a41e-8625-4246-948b-cbe0c6cb3abb",
+  "sha12": "9136e451fb9e"
+ },
+ "martip_f_raw": {
+  "asset_id": "cbd0749a-1974-4cc7-89bf-2125e5f6fbb3",
+  "sha12": "bff0fbd9d9cd"
+ },
+ "woolt_b": {
+  "asset_id": "e070e349-ff8f-4268-b9a6-0d3591325100",
+  "sha12": "85d8b739ea08"
+ },
+ "scorchvix_b": {
+  "asset_id": "3f3b961d-cd1e-42ef-957c-e7ebb2032344",
+  "sha12": "55bd0c805f30"
+ },
+ "infernix_f_raw": {
+  "asset_id": "24e9d518-22f5-4e2a-8be7-bfcd465ef7a8",
+  "sha12": "ab2da1980f5f"
+ },
+ "infernix_b": {
+  "asset_id": "8e47e86a-31e5-422f-9a2a-2b4c2dff75dd",
+  "sha12": "cd68f0640da1"
+ },
+ "thistlehog_b": {
+  "asset_id": "dea978b7-e0ca-4a46-b1ea-41892af32108",
+  "sha12": "9f154ef4fb5b"
+ },
+ "bramblord_f_raw": {
+  "asset_id": "1b78fa0d-319a-419d-9307-af9883adfa87",
+  "sha12": "345679d51813"
+ },
+ "bramblord_b": {
+  "asset_id": "9405c2fe-5241-43e9-b52b-be286feab9e0",
+  "sha12": "54a0d30a5628"
+ },
+ "rivotter_b": {
+  "asset_id": "59cfc49c-e346-4064-b92c-c99eee849618",
+  "sha12": "720ecf4249c9"
+ },
+ "tidalord_f_raw": {
+  "asset_id": "3b469e91-dd63-4225-8583-cc674ae9db95",
+  "sha12": "918d71a350eb"
+ },
+ "tidalord_b": {
+  "asset_id": "7998a3b9-0679-4f62-b9a6-01be752b55de",
+  "sha12": "79ff555498d5"
+ },
+ "grimrat_b": {
+  "asset_id": "18f2a090-413f-4c7d-ad0b-04ca4bbb662b",
+  "sha12": "82ab90b7bdab"
+ },
+ "mushlet_b": {
+  "asset_id": "0a70e9b7-f86a-4b4d-aeb2-b0eb0b80e1b2",
+  "sha12": "0a86e538332a"
+ },
+ "_recipe": {
+  "model": "gpt-image-2",
+  "quality": "low",
+  "pixel": true,
+  "size": 96,
+  "style_refs": {
+   "grass_back": "72333b9d-952e-4251-81f4-b1c79827456b",
+   "water_back": "1728d63a-8071-40ba-bbf9-d3aef2a5a220",
+   "fire_back": "4f9401ec-539c-4d46-ac72-96f35982bf0f"
+  },
+  "note": "reference_asset_id = the front uploaded at 4x nearest; import with tools/sc_import.py"
+ }
+}
