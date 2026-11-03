@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Rear views of the last five Chapter 1 Beasties (Journal #015, #023, #128, #130, #138), made with the back-view kit.
 # Each is painted facing left (head to the upper left) and mirrored by finish_back(). Colours come from each front.
-# Run: python3 tools/inhouse/chapter1_backs.py [name ...]   (writes art/out/b_<name>_b.png and shots/<name>_fb.png)
+# Run: python3 tools/inhouse/chapter1_backs.py [name ...]   (writes art/drafts/b_<name>_b_painted.png and shots/<name>_fb.png)
 import os, sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from backkit import *
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -103,6 +103,6 @@ ALL = dict(bumbellow=bumbellow, cairnling=cairnling, martip=martip, grimpup=grim
 
 if __name__ == '__main__':
     for name in sys.argv[1:] or ALL:
-        out = os.path.join(root, f'art/out/b_{name}_b.png')
+        out = os.path.join(root, f'art/drafts/b_{name}_b_painted.png'); os.makedirs(os.path.dirname(out), exist_ok=True)
         im = finish_back(ALL[name](), out); print(name, 'back', im.size)
         compare(os.path.join(root, f'art/out/b_{name}_f.png'), out, os.path.join(root, f'shots/{name}_fb.png'))

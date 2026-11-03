@@ -95,3 +95,81 @@ def compare(front_path, back_path, out, S=6):
     sh.alpha_composite(f.resize((f.width * S, f.height * S), Image.NEAREST), (4 * S, (4 + max(f.height, b.height) - f.height) * S))
     sh.alpha_composite(b.resize((b.width * S, b.height * S), Image.NEAREST), ((f.width + 8) * S, (4 + max(f.height, b.height) - b.height) * S))
     os.makedirs(os.path.dirname(out) or '.', exist_ok=True); sh.convert('RGB').save(out)
+
+
+# ---- match a painted back to its front (colours, fur texture, outline) ----
+# The painted shapes are smooth; the fronts are grainy, use their own exact colours and a dark 1px outline.
+# match_front() keeps the painted shapes and shading but borrows the rest from the front, and score() says how
+# close a back is to its front, so several tries can be compared and the best one kept.
+
+def _opaque(a): return a[..., 3] > 127
+
+def _edge(m):
+    from scipy.ndimage import binary_erosion
+    return m & ~binary_erosion(m)
+
+def _lum(rgb): return rgb[..., :3].astype(float) @ np.array([.299, .587, .114])
+
+def front_palette(front):
+    a = np.array(front.convert('RGBA')); m = _opaque(a)
+    return np.unique(a[..., :3][m].reshape(-1, 3), axis=0).astype(float)
+
+def snap(rgb, pal):
+    d = ((rgb[..., None, :].astype(float) - pal[None, None]) ** 2).sum(-1); return pal[d.argmin(-1)]
+
+def match_front(back, front, block=4, detail=1.0, seed=0):
+    """Give a painted back the front's colours, fur texture and outline. Returns a new RGBA image."""
+    from scipy.ndimage import uniform_filter, binary_erosion
+    rng = np.random.default_rng(seed)
+    b = np.array(back.convert('RGBA')).astype(float); f = np.array(front.convert('RGBA')).astype(float)
+    bm, fm = _opaque(b), _opaque(f); pal = front_palette(front)
+    # texture: the front's detail (each pixel minus its local average), taken from inside the front only
+    fin = binary_erosion(fm, iterations=2)
+    favg = np.stack([uniform_filter(f[..., c], block + 1) for c in range(3)], -1)
+    fdet = f[..., :3] - favg
+    ys, xs = np.where(fin[:-block, :-block])
+    bavg = np.stack([uniform_filter(b[..., c], block + 1) for c in range(3)], -1)
+    out = b[..., :3].copy()
+    H, W = bm.shape
+    for y in range(0, H, block):
+        for x in range(0, W, block):
+            if not bm[y:y + block, x:x + block].any(): continue
+            col = bavg[min(y + block // 2, H - 1), min(x + block // 2, W - 1)]
+            # pick a front patch whose average colour is close to this spot's colour (a few random candidates)
+            k = rng.integers(0, len(ys), 60); cand = favg[ys[k] + block // 2, xs[k] + block // 2]
+            j = k[((cand - col) ** 2).sum(-1).argmin()]
+            h, w = min(block, H - y), min(block, W - x)
+            out[y:y + h, x:x + w] += detail * fdet[ys[j]:ys[j] + h, xs[j]:xs[j] + w]
+    out = snap(np.clip(out, 0, 255), pal)
+    # outline: the front's own edge colour, 1px all round
+    fe = f[..., :3][_edge(fm)]; oc = fe[_lum(fe).argsort()[:max(1, len(fe) // 3)]].mean(0)
+    out[_edge(bm)] = snap(oc[None, None], pal)[0, 0]
+    res = np.dstack([out, np.where(bm, 255, 0)]).astype(np.uint8)
+    return Image.fromarray(res, 'RGBA')
+
+def score(back, front):
+    """0-100, higher is closer to the front's look: colour mix, grain, outline darkness. Also returns the parts."""
+    b = np.array(back.convert('RGBA')).astype(float); f = np.array(front.convert('RGBA')).astype(float)
+    bm, fm = _opaque(b), _opaque(f); pal = front_palette(front)
+    def hist(a, m):
+        d = ((a[..., :3][m][:, None] - pal[None]) ** 2).sum(-1); h = np.bincount(d.argmin(1), minlength=len(pal)).astype(float)
+        return h / h.sum()
+    def grain(a, m):
+        from scipy.ndimage import uniform_filter, binary_erosion
+        L = _lum(a); inner = binary_erosion(m, iterations=2)
+        return np.abs(L - uniform_filter(L, 3))[inner].mean()
+    def edark(a, m): return _lum(a[_edge(m)]).mean()
+    colours = 1 - .5 * np.abs(hist(b, bm) - hist(f, fm)).sum()          # 1 = same colour mix
+    gb, gf = grain(b, bm), grain(f, fm); texture = min(gb, gf) / max(gb, gf, 1e-6)
+    eb, ef = edark(b, bm), edark(f, fm); outline = 1 - min(1, abs(eb - ef) / 80)
+    parts = dict(colours=round(colours * 100), texture=round(texture * 100), outline=round(outline * 100))
+    return round((colours * .4 + texture * .35 + outline * .25) * 100), parts
+
+def best_match(back, front, tries=((3, .8), (4, 1.0), (4, .7), (5, 1.0), (3, 1.1)), seeds=3):
+    """Try a few texture settings and seeds and keep the back that scores closest to the front."""
+    best = None
+    for block, det in tries:
+        for s in range(seeds):
+            im = match_front(back, front, block, det, s); sc = score(im, front)
+            if best is None or sc[0] > best[1][0]: best = (im, sc, (block, det, s))
+    return best
